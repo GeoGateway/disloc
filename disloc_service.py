@@ -7,11 +7,20 @@
         -- multiple input files
 """
 
+import sys
 import argparse
+from earthquakefeed import check_event_geojson
 
 
 def moment_tensor_workflow(geojsonurl):
     """execute moment tensor workflow"""
+
+    # parse event json to get dict object
+    event = check_event_geojson(geojsonurl)
+
+    if not "moment-tensor" in event:
+        print("no moment tensor is presented in ", geojsonurl)
+        sys.exit()
 
     return
 
