@@ -4,6 +4,7 @@
     -- run disloc binary
 """
 
+import subprocess
 
 def createDislocInputFile(dislocParams, faults, inputFile):
     """create disloc inputfile
@@ -53,33 +54,49 @@ def createDislocInputFile(dislocParams, faults, inputFile):
             linestr = " ".join(map(str, [FAULT_LINE_PREFIX, singlefault.faultDepth, singlefault.faultDipAngle, singlefault.faultLameLambda, singlefault.faultLameMu, singlefault.faultStrikeSlip, singlefault.faultDipSlip, singlefault.faultTensileSlip, singlefault.faultLength, singlefault.faultWidth]))
             f.write(linestr + "\n")
 
+
+def executeDisloc(inputfile, outfile):
+    """executeDisloc binary"""
+
+    # "gcc disloc.c -o disloc -lm
+    # shall call a configuration for binary location
+    dislocbinary = "./disloc_binary"
+    rectcode = subprocess.call([dislocbinary, inputfile, outfile])
+
+    if rectcode == 0:
+        return True
+    else:
+        return False
+
+
 def debug():
     """testing functions in disloctools"""
 
     # test createDislocInputFile functions
     # sample.input
     # 36.5 70.7 1
-    # -100.0 10.0 21 -120.0 5.0 30
-    # 5.0 10.0 106.0
+    # -100.0 10.0 21 -100.0 10.0 21
+    # 0.0 0.0 106.0
     # 1 213.5 70.0 1.0 1.0 0.0 5000.0 0.0 20.0 19.0
     # -19.2252027 5.512789 106.009903
     # 1 213.5 70.0 1.0 1.0 0.0 5000.0 0.0 19.988104 19.0
+
     from dislocclasses import Fault, DislocParamsBean
     dislocparams = DislocParamsBean()
     dislocparams.setOriginLat(36.5)
     dislocparams.setOriginLon(70.7)
     dislocparams.setObservationPointStyle(1)
     dislocparams.setGridMinXValue(-100.0)
-    dislocparams.setGridMinYValue(-120.0)
+    dislocparams.setGridMinYValue(-100.0)
     dislocparams.setGridXSpacing(10.0)
-    dislocparams.setGridYSpacing(5.0)
+    dislocparams.setGridYSpacing(10.0)
     dislocparams.setGridXIterations(21)
-    dislocparams.setGridYIterations(30)
+    dislocparams.setGridYIterations(21)
 
     testfault = Fault()
     # lon, lat are ignored here
-    testfault.setFaultLocationX(5.0)
-    testfault.setFaultLocationY(10.0)
+    testfault.setFaultLocationX(0.0)
+    testfault.setFaultLocationY(0.0)
     testfault.setFaultStrikeAngle(106)
 
     testfault.setFaultDepth(213.5)
@@ -118,8 +135,12 @@ def debug():
 
     testfile = "test.input"
 
+    # create input file
     createDislocInputFile(dislocparams, [testfault, secondfault], testfile)
 
+    # run disloc binary
+    testoutput = "test.output"
+    executeDisloc(testfile, testoutput)
 
 if __name__ == "__main__":
     debug()
