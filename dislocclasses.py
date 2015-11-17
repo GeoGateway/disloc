@@ -106,58 +106,58 @@ class DislocParamsBean():
         # SCATTER_OBSERVATION_STYLE = 0
         self.observationPointStyle = 1
 
-        # Setters
-        def setOriginLat(self, originLat):
-            self.originLat = originLat
+    # Setters
+    def setOriginLat(self, originLat):
+        self.originLat = originLat
 
-        def setOriginLon(self, originLon):
-            self.originLon = originLon
+    def setOriginLon(self, originLon):
+        self.originLon = originLon
 
-        def setGridMinXValue(self, gridMinXValue):
-            self.gridMinXValue = gridMinXValue
+    def setGridMinXValue(self, gridMinXValue):
+        self.gridMinXValue = gridMinXValue
 
-        def setGridMinYValue(self, gridMinYValue):
-            self.gridMinYValue = gridMinYValue
+    def setGridMinYValue(self, gridMinYValue):
+        self.gridMinYValue = gridMinYValue
 
-        def setGridXSpacing(self, gridXSpacing):
-            self.gridXSpacing = gridXSpacing
+    def setGridXSpacing(self, gridXSpacing):
+        self.gridXSpacing = gridXSpacing
 
-        def setGridYSpacing(self, gridYSpacing):
-            self.gridYSpacing = gridYSpacing
+    def setGridYSpacing(self, gridYSpacing):
+        self.gridYSpacing = gridYSpacing
 
-        def setGridXIterations(self, gridXIterations):
-            self.gridXIterations = gridXIterations
+    def setGridXIterations(self, gridXIterations):
+        self.gridXIterations = gridXIterations
 
-        def setGridYIterations(self, gridYIterations):
-            self.gridYIterations = gridYIterations
+    def setGridYIterations(self, gridYIterations):
+        self.gridYIterations = gridYIterations
 
-        def setObservationPointStyle(self, observationPointStyle):
-            self.observationPointStyle = observationPointStyle
+    def setObservationPointStyle(self, observationPointStyle):
+        self.observationPointStyle = observationPointStyle
 
-        # Getters
-        def getOriginLon(self):
-            return self.originLon
+    # Getters
+    def getOriginLon(self):
+        return self.originLon
 
-        def getOriginLat(self):
-            return self.originLat
+    def getOriginLat(self):
+        return self.originLat
 
-        def getGridMinXValue(self):
-            return self.gridMinXValue
+    def getGridMinXValue(self):
+        return self.gridMinXValue
 
-        def getGridMinYValue(self):
-            return self.gridMinYValue
+    def getGridMinYValue(self):
+        return self.gridMinYValue
 
-        def getGridXSpacing(self):
-            return self.gridXSpacing
+    def getGridXSpacing(self):
+        return self.gridXSpacing
 
-        def getGridYSpacing(self):
-            return self.gridYSpacing
+    def getGridYSpacing(self):
+        return self.gridYSpacing
 
-        def getGridXIterations(self):
-            return self.gridXIterations
+    def getGridXIterations(self):
+        return self.gridXIterations
 
-        def getGridYIterations(self):
-            return self.gridYIterations
+    def getGridYIterations(self):
+        return self.gridYIterations
 
-        def getObservationPointStyle(self):
-            return self.observationPointStyle
+    def getObservationPointStyle(self):
+        return self.observationPointStyle
