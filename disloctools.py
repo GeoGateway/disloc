@@ -54,6 +54,13 @@ def createDislocInputFile(dislocParams, faults, inputFile):
             linestr = " ".join(map(str, [FAULT_LINE_PREFIX, singlefault.faultDepth, singlefault.faultDipAngle, singlefault.faultLameLambda, singlefault.faultLameMu, singlefault.faultStrikeSlip, singlefault.faultDipSlip, singlefault.faultTensileSlip, singlefault.faultLength, singlefault.faultWidth]))
             f.write(linestr + "\n")
 
+def createMomentTensorInputFile(eqevent):
+    """create disloc input file from moment tesnor solution
+        eqevent: dict object with moment tensor solution
+    """
+
+    pass
+
 
 def executeDisloc(inputfile, outfile):
     """executeDisloc binary"""
@@ -69,8 +76,8 @@ def executeDisloc(inputfile, outfile):
         return False
 
 
-def debug():
-    """testing functions in disloctools"""
+def test_createDislocInputFile():
+    """testing createDislocInputFile"""
 
     # test createDislocInputFile functions
     # sample.input
@@ -138,9 +145,32 @@ def debug():
     # create input file
     createDislocInputFile(dislocparams, [testfault, secondfault], testfile)
 
+
+def test_executeDisloc():
+    """testing executeDisloc"""
+
     # run disloc binary
+    testfile = "test.input"
     testoutput = "test.output"
     executeDisloc(testfile, testoutput)
+
+
+def test_createMomentTensorInputFile():
+    """testing createMomentTensorInputFile"""
+
+    from earthquakefeed import check_event_geojson
+
+    eventurl = "http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us200041ty.geojson"
+    print(check_event_geojson(eventurl))
+
+
+def debug():
+    """testing functions in disloctools"""
+
+    # test_createDislocInputFile()
+    # test_executeDisloc()
+
+    test_createMomentTensorInputFile()
 
 if __name__ == "__main__":
     debug()
