@@ -49,8 +49,6 @@ $
 #include   <stdio.h>
 #include <stdlib.h>
 #include   <math.h>
-#include <sys/ioctl.h>
-#include   <sgtty.h>
 #include   <strings.h>
 
 #define FL "%.16g"
@@ -101,8 +99,6 @@ struct sumout
    double  str1,str2,str3;
    }*sum;
 
-//struct sgttyb ttystat;
-struct sgttyb;
 static int test,j;
 float  sa,ca;
 
@@ -125,8 +121,6 @@ char  *argv[];
  * if output is redirected, don't wait for input between  *   
  * pages of documentation                                 *  
  **********************************************************/ 
-   //piped_in = ioctl((fileno(stdin)),TIOCGETP,&ttystat);    
-   //piped_out = ioctl((fileno(stdout)),TIOCGETP,&ttystat); 
    if (argc == 1 && !piped_in)                           
       {                                                 
       if((srcfile = fopen(SOURCE,"r")) == NULL)        
@@ -575,15 +569,24 @@ double  xi,eta;
 /*
  *  find displacement parts
  */
-   jnk2 = (xi*eta)/(q*rr);
+   jnk2 =  q*rr <= 1.0e-8 ? 0.0 : (xi*eta)/(q*rr);
    at = (fabs(q) <= 1.0e-08) ? 0.0 : atan(jnk2);
-   lg = srpe ? -log(rr-eta) : log(rr+eta);
+   if (fabs(rr) <= 1.0e-8 && fabs(eta) <= 1.0e-8)
+   {
+      lg = 0.0;
+   }
+   else
+   {
+      lg = srpe ? -log(rr-eta) : log(rr+eta);
+   }
+   
    if (cd == 0.0)
       {
-      i1 = -mat2*xi*q/rdt2;
-      i3 = mat2*(eta/rdt+yt*q/rdt2-lg);
-      i4 = -mat*q/rdt;
-      i5 = -mat*xi*sd/(rr+dt);
+      /* apparently point at fault corner can generate rdt2 == 0.  Handle. */
+      i1 =  rdt2 <= 1.0e-8? 0.0: -mat2*xi*q/rdt2;
+      i3 = rdt2 <= 1.0e-8? mat2*(-lg) : mat2*(eta/rdt+yt*q/rdt2-lg);
+      i4 = rdt2 <= 1.0e-8? 0.0: -mat*q/rdt;
+      i5 = rr+dt  <= 1.0e-8? 0.0: -mat*xi*sd/(rr+dt);
       i2 = mat*(-lg)-i3;
       }
    else
@@ -601,7 +604,7 @@ double  xi,eta;
       f->up[0] = t1*(at+i1*sd);
       f->up[1] = t1*(i2*sd);
       f->up[2] = t1*(i4*sd);
-      f->up[3] = t2*(q/rr - i3*sd*cd);
+      f->up[3] = (fabs(rr) <= 1.0e-8)? -t2*i3*sd*cd : t2*(q/rr - i3*sd*cd);
       f->up[4] = t2*(cd*at-i1*sd*cd);
       f->up[5] = t2*(sd*at-i5*sd*cd);
       f->up[7] = t3*(sd*at-i1*sd*sd);
@@ -646,40 +649,70 @@ double  xi,eta;
  */
    if (cd == 0.0)
       {
-      k1 = mat*xi*q/(rr*rdt2);
-      k3 = mat*sd/rdt*(xi*xi/(rr*rdt)-1.0);
-      k2 = srpe ? (mat*(-sd/rr)-k3) :
-		           (mat*(-sd/rr+q*cd/(rr*(rr+eta)))-k3);
+      k1 = (fabs(rr*rdt2) <= 1.0e-8)? 0.0 : mat*xi*q/(rr*rdt2);
+      k3 = (fabs(rr*rdt) <= 1.0e-8 || fabs(rdt) <= 1.0e-8)? -1.0: mat*sd/rdt*(xi*xi/(rr*rdt)-1.0);
+      if (srpe) k2 = (fabs(rr) <= 1.0e-8) ? -k3 : (mat*(-sd/rr)-k3);
+      else k2 = (fabs(rr) <= 1.0e-8) ? mat*(-k3): (mat*(-sd/rr+q*cd/(rr*(rr+eta)) )- k3);
       }
    else
       {
-      k3 = srpe ? (mat/cd*(-yt/(rr*rdt))) : 
+      if (fabs(rr*rdt2) <= 1.0e-8)
+         {
+         k3 = 0.0;
+         k2 = (-k3); 
+         k1 = 0.0;
+
+         }
+      else
+         {
+         k3 = srpe ? (mat/cd*(-yt/(rr*rdt))) : 
 			   (mat/cd*(q/(rr*(rr+eta))-yt/(rr*rdt)));
-      k2 = srpe ? (mat*(-sd/rr)-k3) :
+         k2 = srpe ? (mat*(-sd/rr)-k3) :
 		           (mat*(-sd/rr+q*cd/(rr*(rr+eta)))-k3);
-      k1 = srpe ? (mat*xi/cd*(1.0/(rr*rdt))):
+         k1 = srpe ? (mat*xi/cd*(1.0/(rr*rdt))):
 			   (mat*xi/cd*(1.0/(rr*rdt)-sd/(rr*(rr+eta))));
+         }
       }
-   j1 = (cd == 0.0) ? (mat2*q/rdt2*(2.0*xi*xi/(rr*rdt)-1.0)):
-	    	      (mat/cd*(xi*xi/(rr*rdt2)-1.0/rdt)-sd*k3/cd);
-   j2 = (cd == 0.0) ? (mat2*xi*sd/rdt2*(2.0*q*q/(rr*rdt)-1.0)):
-		      (mat/cd*(xi*yt/(rr*rdt2))-sd*k1/cd);
-   j3 = srpe ? (-j2): (mat*(-xi/(rr*(rr+eta)))-j2);
-   j4 = srpe ? (mat*(-cd/rr)-j1): (mat*(-cd/rr-q*sd/(rr*(rr+eta)))-j1);
-   axi = srpx ? 0.0 : (2.0*rr+xi)/(rr*rr*rr*(rr+xi)*(rr+xi));
-   aeta = srpe ? 0.0 : (2.0*rr+eta)/(rr*rr*rr*(rr+eta)*(rr+eta));
+   if (fabs(rr) <= 1.0e-8){
+      j1 = (cd == 0.0) ? 0.0 : 
+	       	      (mat/cd*(xi*xi/(rr*rdt2)-1.0/rdt)-sd*k3/cd);
+      j2 = (cd == 0.0) ? 0.0:
+		         (mat/cd*(xi*yt/(rr*rdt2))-sd*k1/cd);
+      j3 = -j2;
+      j4 = (-j1);
+      axi = 0.0 ;
+      aeta =  0.0;
+   }
+   else{
+   
+      j1 = (cd == 0.0) ? (mat2*q/rdt2*(2.0*xi*xi/(rr*rdt)-1.0)):
+	       	      (mat/cd*(xi*xi/(rr*rdt2)-1.0/rdt)-sd*k3/cd);
+      j2 = (cd == 0.0) ? (mat2*xi*sd/rdt2*(2.0*q*q/(rr*rdt)-1.0)):
+		         (mat/cd*(xi*yt/(rr*rdt2))-sd*k1/cd);
+      j3 = srpe ? (-j2): (mat*(-xi/(rr*(rr+eta)))-j2);
+      j4 = srpe ? (mat*(-cd/rr)-j1): (mat*(-cd/rr-q*sd/(rr*(rr+eta)))-j1);
+      axi = srpx ? 0.0 : (2.0*rr+xi)/(rr*rr*rr*(rr+xi)*(rr+xi));
+      aeta = srpe ? 0.0 : (2.0*rr+eta)/(rr*rr*rr*(rr+eta)*(rr+eta));
+   }
+
    /* treat the ones with no rr+xi or rr+eta removable singularities first */
    f->ep[0] = -t1*(xi2*q*aeta-j1*sd);
-   f->ep[1] = -t1*(xi3*dt/(rr3*(eta*eta+q*q))-(xi3*aeta+j2)*sd);
-   f->ep[2] = -t1*(xi*q*cd/rr3+(xi*q*q*aeta-j2)*sd);
-   f->ep[4] = -t2*(xi*q/rr3+j3*sd*cd);
-   f->ep[5] = -t2*(yt*q/rr3-sd/rr+j1*sd*cd);
+   if (fabs(eta*eta+q*q) <= 1.0e-8)
+      f->ep[1] = fabs(rr) <= 1.0e-8 ? -(xi3*aeta+j2)*sd : 
+           -t1*( -(xi3*aeta+j2)*sd);
+   else
+      f->ep[1] = fabs(rr) <= 1.0e-8 ? -(xi3*aeta+j2)*sd : 
+           -t1*(xi3*dt/(rr3*(eta*eta+q*q))-(xi3*aeta+j2)*sd);
+
+   f->ep[2] = fabs(rr) <= 1.0e-8 ? (xi*q*q*aeta-j2)*sd : -t1*(xi*q*cd/rr3+(xi*q*q*aeta-j2)*sd);
+   f->ep[4] = fabs(rr) <= 1.0e-8 ?  -t2*j3*sd*cd : -t2*(xi*q/rr3+j3*sd*cd);
+   f->ep[5] = fabs(rr) <= 1.0e-8 ?  -t2*(j1*sd*cd) : -t2*(yt*q/rr3-sd/rr+j1*sd*cd);
    f->ep[8] = -t3*(xi*q*q*aeta+j3*sd*sd);
-   f->ep[9] = -t3*(-dt*q/rr3-xi2*q*aeta*sd+j1*sd*sd);
-   f->ep[10] = -t3*(q*q*cd/rr3+q*q*q*aeta*sd+j1*sd*sd);
-   f->ep[12] = -t1*(-xi*q*q*aeta*cd+(xi*q/rr3-k1)*sd);
-   f->ep[13] = -t1*(dt*q*cd/rr3+(xi*xi*q*aeta*cd-sd/rr+yt*q/rr3-k2)*sd);
-   f->ep[16] = -t3*(q*q*sd/rr3-q*q*q*aeta*cd+k3*sd*sd);
+   f->ep[9] = -t3*(-xi2*q*aeta*sd+j1*sd*sd) ;
+   f->ep[10] = fabs(rr) <= 1.0e-8 ? -t3*(q*q*q*aeta*sd+j1*sd*sd): -t3*(q*q*cd/rr3+q*q*q*aeta*sd+j1*sd*sd);
+   f->ep[12] =  fabs(rr) <= 1.0e-8 ? -t1*(-xi*q*q*aeta*cd+(-k1)*sd): -t1*(-xi*q*q*aeta*cd+(xi*q/rr3-k1)*sd);
+   f->ep[13] = fabs(rr) <= 1.0e-8 ?-t1*((xi*xi*q*aeta*cd-k2)*sd): -t1*(dt*q*cd/rr3+(xi*xi*q*aeta*cd-sd/rr+yt*q/rr3-k2)*sd);
+   f->ep[16] = fabs(rr) <= 1.0e-8 ?-t3*(-q*q*q*aeta*cd+k3*sd*sd): -t3*(q*q*sd/rr3-q*q*q*aeta*cd+k3*sd*sd);
 
    if(srpe && srpx)
        {
@@ -689,34 +722,36 @@ double  xi,eta;
        } 
    else if (srpe) 
        {
-       f->ep[3] = -t1*(yt*q*cd/rr3+(q*q*q*aeta*sd-(xi2+  (eta*eta) )*cd/rr3- j4)*sd);
-       f->ep[6] = -t2*(yt*q/rr3+j1*sd*cd);
-       f->ep[7] = -t2*(yt*yt*q*axi-(2.0*yt/(rr*(rr+xi)))*sd+ j2*sd*cd);
-       f->ep[14] = -t2*(dt*q/rr3+k3*sd*cd);
-       f->ep[15] = -t2*(yt*dt*q*axi-(2.0*dt/(rr*(rr+xi)))* sd+k1*sd*cd);
-   
+          f->ep[3] = fabs(rr) <= 1.0e-8 ? -t1*(q*q*q*aeta*sd-(xi2  - j4)*sd) : -t1*(yt*q*cd/rr3+(q*q*q*aeta*sd-(xi2+  (eta*eta) )*cd/rr3- j4)*sd);
+          f->ep[6] =  fabs(rr) <= 1.0e-8 ? -t2*(j1*sd*cd) :-t2*(yt*q/rr3+j1*sd*cd);
+          f->ep[7] = fabs(rr) <= 1.0e-8 ?  -t2*(yt*yt*q*axi + j2*sd*cd) :-t2*(yt*yt*q*axi-(2.0*yt/(rr*(rr+xi)))*sd+ j2*sd*cd);
+          f->ep[14] =fabs(rr) <= 1.0e-8 ?  -t2*(k3*sd*cd) : -t2*(dt*q/rr3+k3 *sd*cd);
+          f->ep[15] = fabs(rr) <= 1.0e-8 ?-t2*(yt*dt*q*axi +k1*sd*cd) :-t2*(yt*dt*q*axi-(2.0*dt/(rr*(rr+xi)))* sd+k1*sd*cd);
        } 
     else if (srpx) 
        {
-       f->ep[7] = -t2*(yt*yt*q*axi + j2*sd*cd);
-       f->ep[11] = -t3*((yt*cd-dt*sd)*q*q*axi- (xi*q*q*aeta-j2)*sd*sd);
-       f->ep[15] = -t2*(yt*dt*q*axi -xi*sd/rpe* sd+k1*sd*cd);
-       f->ep[17] = -t3*((yt*sd+dt*cd)*q*q*axi+xi*q*q*aeta*sd*cd+ k1*sd*sd);
-
+          f->ep[7] = -t2*(yt*yt*q*axi + j2*sd*cd);
+          f->ep[11] = -t3*((yt*cd-dt*sd)*q*q*axi- (xi*q*q*aeta-j2)*sd*sd);
+          f->ep[15] = -t2*(yt*dt*q*axi -xi*sd/rpe* sd+k1*sd*cd);
+          f->ep[17] = -t3*((yt*sd+dt*cd)*q*q*axi+xi*q*q*aeta*sd*cd+ k1*sd*sd);
        } 
     else  
        {
-       f->ep[3] = -t1*(yt*q*cd/rr3+(q*q*q*aeta*sd-2.0*q*sd/rpe- (xi2+(eta*eta))*cd/rr3-j4)*sd);
-       f->ep[6] = -t2*(yt*q/rr3+q*cd/rpe+j1*sd*cd);
-       f->ep[7] = -t2*(yt*yt*q*axi-(2.0*yt/(rr*(rr+xi))+xi*cd/rpe) *sd+j2*sd*cd);
-       f->ep[11] = -t3*((yt*cd-dt*sd)*q*q*axi-q*2.0*sd*cd/(rr*(rr+xi))-
-                     (xi*q*q*aeta-j2)*sd*sd);
-       f->ep[14] = -t2*(dt*q/rr3+q*sd/rpe+k3*sd*cd);
-       f->ep[15] = -t2*(yt*dt*q*axi-(2.0*dt/(rr*(rr+xi))+xi*sd/rpe)* sd+k1*sd*cd);
-       f->ep[17] = -t3*((yt*sd+dt*cd)*q*q*axi+xi*q*q*aeta*sd*cd-(2.0*q/(rr*(rr+xi))-
-                     k1)*sd*sd);
+          f->ep[3] = fabs(rr) <= 1.0e-8 ?  
+             -t1*((q*q*q*aeta*sd-2.0*q*sd/rpe + j4)*sd) : 
+             -t1*(yt*q*cd/rr3+(q*q*q*aeta*sd-2.0*q*sd/rpe- (xi2+(eta*eta))*cd/rr3-j4)*sd);
+          f->ep[6] = fabs(rr) <= 1.0e-8 ? -t2*(yt*q/rr3+q*cd/rpe+j1*sd*cd) : -t2*(yt*q/rr3+q*cd/rpe+j1*sd*cd);
+          f->ep[7] = fabs(rr) <= 1.0e-8 ? -t2*(yt*yt*q*axi-( +xi*cd/rpe) *sd+j2*sd*cd):
+                                          -t2*(yt*yt*q*axi-(2.0*yt/(rr*(rr+xi))+xi*cd/rpe) *sd+j2*sd*cd);
+          f->ep[11] = fabs(rr) <= 1.0e-8 ? -t3*((yt*cd-dt*sd)*q*q*axi- (xi*q*q*aeta-j2)*sd*sd):
+          -t3*((yt*cd-dt*sd)*q*q*axi-q*2.0*sd*cd/(rr*(rr+xi))- (xi*q*q*aeta-j2)*sd*sd);
+          f->ep[14] = fabs(rr) <= 1.0e-8 ? -t2*(+q*sd/rpe+k3*sd*cd):
+           -t2*(dt*q/rr3+q*sd/rpe+k3*sd*cd);
+          f->ep[15] = fabs(rr) <= 1.0e-8 ? -t2*(yt*dt*q*axi-(+xi*sd/rpe)* sd+k1*sd*cd):
+           -t2*(yt*dt*q*axi-(2.0*dt/(rr*(rr+xi))+xi*sd/rpe)* sd+k1*sd*cd);
+          f->ep[17] = fabs(rr) <= 1.0e-8 ? -t3*((yt*sd+dt*cd)*q*q*axi+xi*q*q*aeta*sd*cd+ k1*sd*sd): 
+            -t3*((yt*sd+dt*cd)*q*q*axi+xi*q*q*aeta*sd*cd-(2.0*q/(rr*(rr+xi))- k1)*sd*sd);
        }
-  
 }
 
 /*********************************************************************/
