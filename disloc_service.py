@@ -18,7 +18,7 @@ def moment_tensor_workflow(geojsonurl):
     # parse event json to get dict object
     event = check_event_geojson(geojsonurl)
 
-    if not "moment-tensor" in event:
+    if "moment-tensor" not in event:
         print("no moment tensor is presented in ", geojsonurl)
         sys.exit()
 

@@ -10,6 +10,7 @@ GeoJSON Detail Format
 
 import urllib.request
 import json
+import os
 
 
 def download_as_text(feedurl):
@@ -30,27 +31,35 @@ def check_event_geojson(eventurl):
 
     rawfeed = download_as_text(eventurl)
 
-    # check if it has monment tensor MWB solution
     eventjson = json.loads(rawfeed)
 
+    # check if it has monment tensor MWB solution
+    # http://earthquake.usgs.gov/earthquakes/feed/v1.0/glossary.php#product_preferredWeight
     momenttensor = {}
-    momenttensor_records = ["nodal-plane-1-dip","nodal-plane-1-rake","nodal-plane-1-strike","nodal-plane-2-dip","nodal-plane-2-rake","nodal-plane-2-strike"]
+    momenttensor_records = ["derived-magnitude-type","nodal-plane-1-dip","nodal-plane-1-rake","nodal-plane-1-strike","nodal-plane-2-dip","nodal-plane-2-rake","nodal-plane-2-strike"]
 
     if "moment-tensor" in eventjson["properties"]["products"]:
-        for entry in eventjson["properties"]["products"]["moment-tensor"]:
-            if entry["properties"]["derived-magnitude-type"].lower() == "mwb":
-                for record in momenttensor_records:
-                    momenttensor[record] = entry["properties"][record]
-    else:
-        print("no moment tensor solution")
+        entries = eventjson["properties"]["products"]["moment-tensor"]
+        weights = [entry['preferredWeight'] for entry in entries]
+        print(weights)
+        pos = weights.index(max(weights))
+        print(pos)
+        preferred_moment = entries[pos]
+        print(preferred_moment)
+
+        for record in momenttensor_records:
+            momenttensor[record] = preferred_moment["properties"][record]
 
     # dict to record earthquake event
     event_dict = {}
-    event_record = ["title","place","mag","time","code","ids","url","updated"]
+    event_record = ["title", "place", "mag", "time", "code", "ids", "url", "updated"]
     for record in event_record:
         event_dict[record] = eventjson["properties"][record]
     # get coordinates: longitude, latitude, depth (in km)
     event_dict['coordinates'] = eventjson['geometry']['coordinates']
+
+    # get id from url rather than ids
+    event_dict['id'] = os.path.basename(event_dict['url'])
 
     # add moment-tensor solution
     if momenttensor == {}:
@@ -88,7 +97,8 @@ def check_summary_geojson(summaryurl):
             # http://earthquake.usgs.gov/earthquakes/feed/v1.0/glossary.php#id
             # ",ci15296281,us2013mqbd,at00mji9pf,"
             ids = entry['properties']['ids']
-            event_id = ids.split(',')[1]
+            event_id = os.path.basename(entry['properties']['url'])
+
             # get place
             place = entry['properties']['place']
             # get time
@@ -119,7 +129,9 @@ def debug():
 
     feedurl = "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson"
     check_summary_geojson(feedurl)
-    eventurl = "http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us200041ty.geojson"
+    eventurl = "http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us20005j32.geojson"
+    print(check_event_geojson(eventurl))
+    eventurl = "http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us10005c88.geojson"
     print(check_event_geojson(eventurl))
 
 if __name__ == "__main__":

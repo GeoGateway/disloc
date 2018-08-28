@@ -161,3 +161,42 @@ class DislocParamsBean():
 
     def getObservationPointStyle(self):
         return self.observationPointStyle
+
+
+class EarthquakeEvent():
+    """earthquake event class
+    """
+
+    def __init__(self, jsonURL):
+        """"""
+        self.eventUrl = jsonURL
+
+        self.monmenttensorflag = False
+        self.monmenttensor = ""
+
+    def setMag(self, mag):
+        self.mag = mag
+
+    def setTitle(self, title):
+        self.title = title
+
+    def setPlace(self, place):
+        self.place = place
+
+    def setTime(self, time):
+        self.time = time
+
+    def setIds(self, ids):
+        self.ids = ids
+
+    def setUpdated(self, updated):
+        self.updated = updated
+
+    def setCoordinates(self, coordinates):
+        self.coordinates = coordinates
+
+    def setMonmentTensorFlag(self, flag):
+        self.monmenttensorflag = flag
+
+    def setMonmentTensor(self, monmenttensor_dict):
+        self.monmenttensor = monmenttensor_dict

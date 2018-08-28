@@ -6,6 +6,7 @@
 
 import subprocess
 
+
 def createDislocInputFile(dislocParams, faults, inputFile):
     """create disloc inputfile
         inputFile: username + projectname + ".input" (suggestion)
@@ -54,11 +55,13 @@ def createDislocInputFile(dislocParams, faults, inputFile):
             linestr = " ".join(map(str, [FAULT_LINE_PREFIX, singlefault.faultDepth, singlefault.faultDipAngle, singlefault.faultLameLambda, singlefault.faultLameMu, singlefault.faultStrikeSlip, singlefault.faultDipSlip, singlefault.faultTensileSlip, singlefault.faultLength, singlefault.faultWidth]))
             f.write(linestr + "\n")
 
+
 def createMomentTensorInputFile(eqevent):
     """create disloc input file from moment tesnor solution
         eqevent: dict object with moment tensor solution
     """
 
+    print(eqevent)
     pass
 
 
@@ -160,8 +163,10 @@ def test_createMomentTensorInputFile():
 
     from earthquakefeed import check_event_geojson
 
+    # an event with moment tensor solution
     eventurl = "http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us200041ty.geojson"
-    print(check_event_geojson(eventurl))
+    eqevent = check_event_geojson(eventurl)
+    createMomentTensorInputFile(eqevent)
 
 
 def debug():
