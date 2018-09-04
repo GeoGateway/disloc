@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 """
 # Generate line-of-sight interferograms
@@ -135,7 +134,7 @@ def color_wheel(fcw):
             ib = (i-11)*51
             ir = 255 -(i-11)*51
         else:
-            print "something wrong!"
+            print("something wrong!")
         wheel[0][i]=math.floor(ir/255.0*225)+30
         wheel[1][i]=math.floor(ig/255.0*225)+30
         wheel[2][i]=math.floor(ib/255.0*225)+30
@@ -334,10 +333,10 @@ if __name__ == "__main__":
         azimuth = 175
         radarFrequency = 1.26*10**9
         radarWaveLength = 299792458.0/radarFrequency * 100.0 # Convert to cm
-        disclocOutput = "F5k_45_175.output.txt"
+        disclocOutput = "test/simple.output.csv"
         imageURL = "file://" + os.getcwd()
         imageURL = ""
-        print "testing plot function with " + disclocOutput
+        print ("testing plot function with " + disclocOutput)
     elif numargv == 3:
         elevation = 60
         azimuth = -5
