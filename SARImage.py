@@ -91,11 +91,10 @@ def generateKML(extent, outputname, imageurl, params):
 
     dislocname = os.path.basename(str(params[0]))
     description = "<![CDATA[%s]]>"
-    desc = string.join(["Disloc :", dislocname, '<br>',
-                       "Elevation (degree): ", str(params[1]), '<br>',
-                       "Azimuth (degree): ", str(params[2]), '<br>',
-                       "Radar Wavelength (cm): ", "%.3f" % params[3],'<br>'
-                       ])
+    desc = '<br>'.join(["Disloc :", dislocname,
+                       "Elevation (degree): ", str(params[1]),
+                       "Azimuth (degree): ", str(params[2]), 
+                       "Radar Wavelength (cm): ", "%.3f" % params[3]])
 
     #print kml % (north,south,east,west)
     description = description % (desc)
@@ -214,7 +213,7 @@ def drawimage(datatable,lonlatgrid, outputname, imageurl, params,colortable=Fals
             colortable=[]
             numinx=[]
             for row in rawtable:
-                rowfloat=map(float,row)
+                rowfloat=list(map(float,row))
                 colortable.append(rowfloat[1:4])
                 numinx.append(int(rowfloat[0]))
         csvfile.close
@@ -273,15 +272,14 @@ def lineofsight (ele,azi,radarWL,disO,url):
         # remove ''
         line = [i for i in row if i !='']
         if not ('x' in line):
-            rawdata.append(map(float,line))
+            rawdata.append(list(map(float,line)))
         else:
             # locate the position of x y ux uy uz exx exy eyy
             header = len(rawdata)
 
     del outputReader
-
     # 30  30  32.237000  -115.083000
-    gridsize = map(int,rawdata[0][:2])
+    gridsize = list(map(int,rawdata[0][:2]))
     reflonlat = [rawdata[0][3], rawdata[0][2]]
     data = rawdata[header:]
 
@@ -333,7 +331,7 @@ if __name__ == "__main__":
         azimuth = 175
         radarFrequency = 1.26*10**9
         radarWaveLength = 299792458.0/radarFrequency * 100.0 # Convert to cm
-        disclocOutput = "test/simple.output.csv"
+        disclocOutput = "test/KO1.input.csv"
         imageURL = "file://" + os.getcwd()
         imageURL = ""
         print ("testing plot function with " + disclocOutput)
