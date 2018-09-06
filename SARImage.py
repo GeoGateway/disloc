@@ -156,7 +156,7 @@ def color_wheel(fcw):
 
     return colormatrx
 
-def drawimage(datatable,lonlatgrid, outputname, imageurl, params,colortable=False):
+def drawimage(datatable,lonlatgrid, outputname, imageurl, params,colortable=True):
     """
        produece image
     """
@@ -317,42 +317,16 @@ def lineofsight (ele,azi,radarWL,disO,url):
 
     drawimage(datatable,gridsize, outputname, url, params,colortable = True)
 
+def main():
 
-if __name__ == "__main__":
-
-
-    numargv = len(sys.argv)
-
-    # NOTE: radar wave length is calculated in centimeters but disloc
-    # output is typically in millimeters.
-    if numargv == 1:
-        ## ----- testing case ---##
-        elevation = 45
-        azimuth = 175
-        radarFrequency = 1.26*10**9
-        radarWaveLength = 299792458.0/radarFrequency * 100.0 # Convert to cm
-        disclocOutput = "test/KO1.input.csv"
-        imageURL = "file://" + os.getcwd()
-        imageURL = ""
-        print ("testing plot function with " + disclocOutput)
-    elif numargv == 3:
-        elevation = 60
-        azimuth = -5
-        radarFrequency = 1.26*10**9
-        radarWaveLength = 299792458.0/radarFrequency * 100.0 # Convert to cm
-        disclocOutput = sys.argv[1]
-        imageURL = sys.argv[2]
-    elif numargv == 6:
-        disclocOutput = sys.argv[1]
-        elevation = float(sys.argv[2])
-        azimuth = float(sys.argv[3])
-        radarFrequency = float(sys.argv[4])*10**9
-        radarWaveLength = 299792458.0/radarFrequency * 100.0 # Convert to cm
-        imageURL = sys.argv[5]
-
-    else:
-        sys.exit("not enough parameters!")
-
-
+    #test case 1
+    elevation = 60
+    azimuth = -5
+    radarFrequency = 1.26*10**9
+    radarWaveLength = 299792458.0/radarFrequency * 100.0 # Convert to cm
+    disclocOutput = "test/4fault.output.csv"
+    imageURL = ""
     lineofsight(elevation, azimuth,radarWaveLength,disclocOutput, imageURL)
 
+if __name__ == "__main__":
+    main()
