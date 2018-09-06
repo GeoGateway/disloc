@@ -63,9 +63,10 @@ def generateKML(extent, outputname, imageurl, params):
     kml = """<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://earth.google.com/kml/2.2">
   <Folder>
-    <name>Disloc interferograms</name>
+    <name>Disloc Interferograms</name>
     <description>%s</description>
     <GroundOverlay>
+      <name>Synthetic Interferograms</name>
       <Icon>
         <href>%s</href>
       </Icon>
@@ -78,6 +79,16 @@ def generateKML(extent, outputname, imageurl, params):
         <west>%s</west>
       </LatLonBox>
     </GroundOverlay>
+    <ScreenOverlay>
+    <name>UAVSAR Legend</name>
+    <Icon>
+        <href>2pi.png</href>
+    </Icon>
+    <overlayXY x="0" y="0" xunits="fraction" yunits="fraction"/>
+    <screenXY x="0" y="40" xunits="pixels" yunits="pixels"/>
+    <rotationXY x="0" y="0" xunits="fraction" yunits="fraction"/>
+    <size x="0" y="0" xunits="fraction" yunits="fraction"/>
+    </ScreenOverlay>
   </Folder>
 </kml>
 """
@@ -108,6 +119,7 @@ def generateKML(extent, outputname, imageurl, params):
     with zipfile.ZipFile(kmz,'w',zipfile.ZIP_DEFLATED) as myzip:
         myzip.write(outputname + ".kml")
         myzip.write(href)
+        myzip.write("2pi.png")
     myzip.close
 
 def color_wheel(fcw):
