@@ -172,14 +172,19 @@ def drawimage(datatable,lonlatgrid, outputname, imageurl, params,colortable=True
     """
        produece image
     """
-    xy=[]
     data=[]
+    lat_xy = []
+    lon_xy = []
     for row in datatable:
-        xy.append(row[0:2])
+        lon_xy.append(row[0])
+        lat_xy.append(row[1])
         data.append(row[2])
 
-    xy0=min(xy)
-    xy1=max(xy)
+    # get the right extent box
+    xy0= [min(lon_xy),min(lat_xy)]
+    xy1= [max(lon_xy),max(lat_xy)]
+    #print(xy0)
+    #print(xy1)
 
 ##    z = np.array(data)
 ##    z = z.reshape(lonlatgrid[1],lonlatgrid[0])
