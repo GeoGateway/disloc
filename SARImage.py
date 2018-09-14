@@ -321,7 +321,8 @@ def lineofsight (ele,azi,radarWL,disO,url):
         # fringe = abs(math.modf(2*losd / radarWL)[0])
         #fringe = 2*losd / radarWL - math.floor(2*losd / radarWL)
         # mapping is changed to ~2pi to 2pi to match UAVSAR
-        fringe = losd / radarWL - math.floor(losd / radarWL)
+        # shall be -12 ~ 12
+        fringe = 2*losd / radarWL - math.floor(2*losd / radarWL)
         #print fringe
         datatable.append([lonlat[0],lonlat[1],fringe])
 
