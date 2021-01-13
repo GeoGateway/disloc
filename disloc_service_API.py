@@ -26,7 +26,31 @@ def test():
     info={}
     info["python"] = sys.version
     info["runningmode"] = app.debug
-    return info["python"] + str(info["runningmode"])
+    info_str = info["python"] + " debug mode: "+str(info["runningmode"]) + "<p>"
+    info_str += disloc.__doc__.replace('\n','<br>')
+    return info_str
+
+"""disloc service"""
+@app.route("/dislocservice/disloc")
+def disloc():
+    """ disloc service 
+          /dislocservice/disloc?
+        
+        Parameters: 
+        --------------
+        input: emebed input file
+        inputurl: url of input file
+        elevation: in degrees
+        azimuth: in degrees
+        radarfrequency: in GHz
+        
+        Returns:
+        --------------
+        json:
+            
+    """
+
+    return
 
 if __name__ == "__main__":
     pass
