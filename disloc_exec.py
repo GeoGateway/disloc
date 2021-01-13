@@ -11,7 +11,9 @@ def getbinary():
     
     # assume the same location as the script
     script_path = os.path.dirname(os.path.realpath(__file__))
-    disloc_binary = script_path + os.path.sep + "disloc_table"
+    #disloc_binary = script_path + os.path.sep + "disloc_table"
+    disloc_binary = script_path + os.path.sep + "disloc"
+    
     return disloc_binary
 
 def exec_disloc(input, output, workdir=False):
