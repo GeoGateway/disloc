@@ -43,6 +43,10 @@ def dislocworkflow(args):
         args: dict object from restAPI call
     """
     
+
+    if 'input' in args:
+        return args['input']    
+
     return "dislocworkflow"
 
 def main():

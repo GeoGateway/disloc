@@ -42,6 +42,9 @@ def disloc():
         --------------
         input: emebed input file
         inputurl: url of input file
+        
+        optional:
+        outputname: output filename 
         elevation: in degrees
         azimuth: in degrees
         radarfrequency: in GHz
