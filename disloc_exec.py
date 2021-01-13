@@ -38,6 +38,12 @@ def exec_disloc(input, output, workdir=False):
 
     return exec_status
 
+def dislocworkflow(args):
+    """disloc workflow
+        args: dict object from restAPI call
+    """
+    
+    return "dislocworkflow"
 
 def main():
 

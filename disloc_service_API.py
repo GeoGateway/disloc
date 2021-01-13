@@ -17,6 +17,8 @@ from flask import Flask
 from flask import request
 from flask import Response
 
+from disloc_exec import dislocworkflow
+
 app = Flask(__name__)
 
 
@@ -50,7 +52,15 @@ def disloc():
             
     """
 
-    return
+    args = request.args
+
+    # assume everything is right
+    if not("input" in args or 'inputurl' in args):
+        return Response("bad request: input or inputurl required!",status=400)
+
+    result = dislocworkflow(args)
+    
+    return result
 
 if __name__ == "__main__":
     pass
