@@ -4,7 +4,28 @@
 """
 
 import os
+import json
+import random
+import datetime
 import subprocess
+
+def setoutputlocation():
+	""" return a folder for output """
+
+	# make a random folder for each job
+	# add time stamp
+	wkdir = "disloc" + str(random.randint(1,9999)).zfill(4) + datetime.datetime.now().strftime("%Y%M%d%H%M%S")
+	# put output into static folder
+	# sample url: http://192.168.59.130:8000/static/kml1867/postseismic.txt
+
+	wkpath = os.path.dirname(os.path.realpath(__file__)) + "/static"
+
+	outputdir = wkpath + os.path.sep + wkdir
+
+	if not os.path.exists(outputdir):
+		os.mkdir(outputdir)
+
+	return outputdir
 
 def getbinary():
     """ get the location of disloc """
@@ -43,11 +64,28 @@ def dislocworkflow(args):
         args: dict object from restAPI call
     """
     
+    # create a working dir
+    outputdir = setoutputlocation()
 
+    inputfile = outputdir + os.path.sep + "input.txt"
+
+    # write input file
     if 'input' in args:
-        return args['input']    
+        with open(inputfile,"w") as f:
+            f.write(args['input'])
 
-    return "dislocworkflow"
+    # exec disloc.c
+    if 'output' in args:
+        outputfile = args['output'] + ".csv"
+    else:
+        outputfile = "output.csv"
+
+    disloc_status = exec_disloc(inputfile,outputfile, workdir = outputdir)    
+
+    if disloc_status['status'] != 'success':
+        return json.dumps({'status':'failed',"error":disloc_status['error']})
+
+    return json.dumps(disloc_status)
 
 def main():
 

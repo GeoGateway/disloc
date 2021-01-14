@@ -44,7 +44,7 @@ def disloc():
         inputurl: url of input file
         
         optional:
-        outputname: output filename 
+        output: name of output file 
         elevation: in degrees
         azimuth: in degrees
         radarfrequency: in GHz
