@@ -45,9 +45,9 @@ def disloc():
         
         optional:
         output: name of output file 
-        elevation: in degrees
-        azimuth: in degrees
-        radarfrequency: in GHz
+        elevation: in degrees, default: 60
+        azimuth: in degrees, default: 0
+        radarfrequency: in GHz, default: 1.26
         
         Returns:
         --------------
@@ -62,8 +62,10 @@ def disloc():
         return Response("bad request: input or inputurl required!",status=400)
 
     result = dislocworkflow(args)
+    if result['status'] != 'success':
+        return Response(json.dumps(result),status=500)
     
-    return result
+    return json.dumps(result)
 
 if __name__ == "__main__":
     pass

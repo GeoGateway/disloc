@@ -268,7 +268,7 @@ def drawimage(datatable,lonlatgrid, outputname, imageurl, params,colortable=True
     #    fig.figimage(logo, xo=fig.bbox.xmax, yo=2,zorder=1)
 
 
-    plt.savefig(outputname + ".png", format="PNG",aspect="auto",transparent=True,dpi=(96))
+    plt.savefig(outputname + ".png", format="PNG",transparent=True,dpi=(96))
 
     generateKML([xy0[0],xy1[0],xy0[1],xy1[1]],outputname, imageurl, params)
 
@@ -342,7 +342,7 @@ def main():
     azimuth = -5
     radarFrequency = 1.26*10**9
     radarWaveLength = 299792458.0/radarFrequency * 100.0 # Convert to cm
-    disclocOutput = "test/4fault.output.csv"
+    disclocOutput = "test/4fault.csv"
     imageURL = ""
     lineofsight(elevation, azimuth,radarWaveLength,disclocOutput, imageURL)
 

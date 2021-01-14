@@ -9,10 +9,10 @@ def fetch_url(url,payload):
     except Exception as e:
         return response.request.url, None, e
 
-def test_input(baseurl):
+def test_input(baseurl,inputfile):
     """test input file"""
 
-    with open('test/4fault.txt','r') as f:
+    with open(inputfile,'r') as f:
         data = f.read()
 
     payload = {'input':data}
@@ -20,9 +20,17 @@ def test_input(baseurl):
     result = fetch_url(baseurl,payload)
     print(result)
 
+
+
+
 def main():
     serverurl = "http://localhost:5000/dislocservice/disloc"
-    test_input(serverurl)
+    # good one
+    disloc_input = "test/4fault.txt"
+    test_input(serverurl,disloc_input)
+    # bad one: timeout
+    #disloc_input = "test/badinput.txt"
+    #test_input(serverurl,disloc_input)
 
 
 if __name__ == '__main__':

@@ -9,6 +9,8 @@ import random
 import datetime
 import subprocess
 
+from SARImage import lineofsight 
+
 def setoutputlocation():
 	""" return a folder for output """
 
@@ -67,8 +69,14 @@ def exec_disloc(input, output, workdir=False):
 def dislocworkflow(args):
     """disloc workflow
         args: dict object from restAPI call
+
+        step 0: working dir and input file
+        step 1: disloc
+        step 2: SARImage
+        step N: result json
     """
     
+    # step 0: working dir and input file
     # create a working dir
     outputdir = setoutputlocation()
 
@@ -79,6 +87,7 @@ def dislocworkflow(args):
         with open(inputfile,"w") as f:
             f.write(args['input'])
 
+    # step 1: disloc
     # exec disloc.c
     if 'output' in args:
         outputfile = args['output'] + ".csv"
@@ -87,11 +96,30 @@ def dislocworkflow(args):
 
     disloc_status = exec_disloc(inputfile,outputfile, workdir = outputdir)    
 
+    # dislo failed
     if disloc_status['status'] != 'success':
         err = disloc_status['error']
-        return json.dumps({"status":"failed","error":err})
+        return {"status":"failed","error":"disloc failed"}
+    
+    # step 2: SARImage
+    # three paras:
+    # elevation: 60
+    # azimuth: 0
+    # radarfrequency: 1.26
+    # step N: result JSON
+    
+    paralist = {"elevation":60,"azimuth":0,"radarfrequency":1.26}
+    for key in paralist:
+        if key in args:
+            paralist[key] = float(args[key])
+    
+    radarwavelength = 299792458.0/paralist['radarfrequency'] * 100.0 # Convert to cm
 
-    return json.dumps(disloc_status)
+    imageURL = ""
+    dislocOutput = outputfile
+    lineofsight(paralist['elevation'], paralist['azimuth'],radarwavelength,dislocOutput, imageURL)
+
+    return disloc_status
 
 def main():
 
