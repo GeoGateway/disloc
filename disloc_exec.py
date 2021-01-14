@@ -47,11 +47,16 @@ def exec_disloc(input, output, workdir=False):
     
     proc = subprocess.Popen([disloc_binary,input,output], stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     try:
-        outs, errs = proc.communicate(timeout=30)
-    except TimeoutExpired:
+        outs, errs = proc.communicate(timeout=15)
+    except subprocess.TimeoutExpired:
         proc.kill()
         outs, errs = proc.communicate()
+        # remove output file, save disk space
+        if os.path.exists(output):
+            os.remove(output)
         exec_status = {"status":"failed","error":"timeout"}
+        return exec_status
+    
     if proc.returncode == 0:
         exec_status = {"status":"success","error":""}
     else:
@@ -83,7 +88,8 @@ def dislocworkflow(args):
     disloc_status = exec_disloc(inputfile,outputfile, workdir = outputdir)    
 
     if disloc_status['status'] != 'success':
-        return json.dumps({'status':'failed',"error":disloc_status['error']})
+        err = disloc_status['error']
+        return json.dumps({"status":"failed","error":err})
 
     return json.dumps(disloc_status)
 
