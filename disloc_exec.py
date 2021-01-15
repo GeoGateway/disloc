@@ -144,14 +144,26 @@ def dislocworkflow(args):
 
     imageURL = ""
     dislocOutput = outputfile
-    lineofsight(paralist['elevation'], paralist['azimuth'],radarwavelength,dislocOutput, imageURL)
-
+    # west = str(extent[0])
+    # east = str(extent[1])
+    # south = str(extent[2])
+    # north = str(extent[3])
+    # # [west,east,south,north]
+    imageextent = lineofsight(paralist['elevation'], paralist['azimuth'],radarwavelength,dislocOutput, imageURL)
+    west = imageextent[0]
+    east = imageextent[1]
+    south =imageextent[2]
+    north =imageextent[3]
+    disloc_status["latlonbox"] = {"north":north,"south":south,"east":east,"west":west}    
+    disloc_status["parameters"] = paralist
     # list of output file
     if outputdir:
         filelist = os.listdir(outputdir)
     else:
         filelist = os.listdir()
 
+    filelist.append('summary.json')
+        
     if 'api' in args:
         disloc_status['output'] = filelist
     else:
@@ -160,6 +172,15 @@ def dislocworkflow(args):
         urlslist = [urlprefix + foldername + "/" + x for x in filelist]
         disloc_status['output'] = urlslist
     
+    if outputdir: 
+        jobsummary = outputdir + os.path.sep + "summary.json"
+    else:
+        jobsummary = "summary.json"
+    
+    # write summary.json
+    with open(jobsummary,"w") as f:
+        f.write(json.dumps(disloc_status,indent = 4))
+
     return disloc_status
 
 def _getParser():

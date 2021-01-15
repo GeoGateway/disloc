@@ -1,2 +1,3 @@
 flask
 mod_wsgi
+matplotlib

@@ -278,6 +278,8 @@ def drawimage(datatable,lonlatgrid, outputname, imageurl, params,colortable=True
     # close fig to release memory
     plt.close(fig)
 
+    # return extent
+    return [xy0[0],xy1[0],xy0[1],xy1[1]]
 
 def lineofsight (ele,azi,radarWL,disO,url):
     """
@@ -337,8 +339,9 @@ def lineofsight (ele,azi,radarWL,disO,url):
 
     outputname = os.path.basename(disO) + ".insar"
 
-    drawimage(datatable,gridsize, outputname, url, params,colortable = True)
+    imageextent = drawimage(datatable,gridsize, outputname, url, params,colortable = True)
     
+    return imageextent
 
 def main():
 
