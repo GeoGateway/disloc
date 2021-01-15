@@ -22,11 +22,39 @@ complile disloc.c:
    * -rf, --radarfrequency : radarfrequency: in GHz, default: 1.26
    * -wd, --workdir : working directory
 </pre>
-output:   
+Output:   
 <pre>
    * input.txt                  input file
    * output.csv			disloc output
    * output.csv.insar.kml	Synthetic Interferograms (kml)
    * output.csv.insar.kmz	Synthetic Interferograms (kmz)
    * output.csv.insar.png	Synthetic Interferograms (plot)   
+   * summary.json               Job execution summary
  </pre>
+Sample of summary.json   
+```json
+{
+    "status": "success",
+    "error": "",
+    "latlonbox": {
+        "north": 33.51348223715415,
+        "south": 32.6151708825009,
+        "east": -114.84272682989001,
+        "west": -116.97993517011
+    },
+    "parameters": {
+        "elevation": 60,
+        "azimuth": -5.0,
+        "radarfrequency": 1.26
+    },
+    "output": [
+        "input.txt",
+        "output.csv.insar.kmz",
+        "output.csv.insar.kml",
+        "output.csv.insar.png",
+        "output.csv",
+        "4fault.txt",
+        "summary.json"
+    ]
+}
+```
