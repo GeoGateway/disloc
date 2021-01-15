@@ -16,6 +16,7 @@ import json
 from flask import Flask
 from flask import request
 from flask import Response
+from flask import jsonify
 
 from disloc_exec import dislocworkflow
 
@@ -59,13 +60,13 @@ def disloc():
 
     # assume everything is right
     if not("input" in args or 'inputurl' in args):
-        return Response("bad request: input or inputurl required!",status=400)
+        return Response(jsonify({"status":"failed","error": "input or inputurl required!"}),status=400)
 
     result = dislocworkflow(args)
     if result['status'] != 'success':
-        return Response(json.dumps(result),status=500)
+        return Response(jsonify(result),status=500)
     
-    return json.dumps(result)
+    return jsonify(result)
 
 if __name__ == "__main__":
     pass

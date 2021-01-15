@@ -116,11 +116,14 @@ def generateKML(extent, outputname, imageurl, params):
 
     # generate kmz
     kmz = outputname + ".kmz"
+    legendfile = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + "2pi.png"
+
     with zipfile.ZipFile(kmz,'w',zipfile.ZIP_DEFLATED) as myzip:
         myzip.write(outputname + ".kml")
         myzip.write(href)
-        myzip.write("2pi.png")
+        myzip.write(legendfile,"2pi.png")
     myzip.close
+    
 
 def color_wheel(fcw):
     """ make goldstein color wheel """
@@ -275,6 +278,7 @@ def drawimage(datatable,lonlatgrid, outputname, imageurl, params,colortable=True
     # close fig to release memory
     plt.close(fig)
 
+
 def lineofsight (ele,azi,radarWL,disO,url):
     """
         caculate line of sight
@@ -334,6 +338,7 @@ def lineofsight (ele,azi,radarWL,disO,url):
     outputname = os.path.basename(disO) + ".insar"
 
     drawimage(datatable,gridsize, outputname, url, params,colortable = True)
+    
 
 def main():
 
@@ -345,6 +350,7 @@ def main():
     disclocOutput = "test/4fault.csv"
     imageURL = ""
     lineofsight(elevation, azimuth,radarWaveLength,disclocOutput, imageURL)
+    
 
 if __name__ == "__main__":
     main()

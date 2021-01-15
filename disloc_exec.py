@@ -1,13 +1,17 @@
+#!/usr/bin/env python
 """
     disloc_exec.py
         -- execute disloc.c with an input file
 """
 
 import os
+import sys
 import json
 import random
 import datetime
 import subprocess
+import argparse
+
 
 from SARImage import lineofsight 
 
@@ -38,6 +42,13 @@ def getbinary():
     disloc_binary = script_path + os.path.sep + "disloc"
     
     return disloc_binary
+
+def getURLprefix():
+    """return url prefix for output"""
+    
+    urlprefix = "http://localhost/disloc/" 
+    
+    return urlprefix
 
 def exec_disloc(input, output, workdir=False):
     """ execute disloc with input and output """
@@ -78,11 +89,20 @@ def dislocworkflow(args):
     
     # step 0: working dir and input file
     # create a working dir
-    outputdir = setoutputlocation()
+    if 'workdir' in args:
+        outputdir = args['workdir']
+    else:
+        outputdir = setoutputlocation()
+
+    # readfile directly
+    if "inputfile" in args:
+        with open(args['inputfile'],'r') as f:
+            inputdata = f.read()
+            args['input'] = inputdata
 
     inputfile = outputdir + os.path.sep + "input.txt"
-
-    # write input file
+        
+    # write input file attached input
     if 'input' in args:
         with open(inputfile,"w") as f:
             f.write(args['input'])
@@ -93,7 +113,7 @@ def dislocworkflow(args):
         outputfile = args['output'] + ".csv"
     else:
         outputfile = "output.csv"
-
+    print(inputfile,outputfile,outputdir)
     disloc_status = exec_disloc(inputfile,outputfile, workdir = outputdir)    
 
     # dislo failed
@@ -117,27 +137,65 @@ def dislocworkflow(args):
 
     imageURL = ""
     dislocOutput = outputfile
+    print(outputfile)
     lineofsight(paralist['elevation'], paralist['azimuth'],radarwavelength,dislocOutput, imageURL)
+
+    # list of output file
+    filelist = os.listdir(outputdir)
+    urlprefix = getURLprefix()
+    foldername = os.path.basename(outputdir)
+    urlslist = [urlprefix + foldername + "/" + x for x in filelist]
+    disloc_status['output'] = urlslist
 
     return disloc_status
 
+def _getParser():
+    
+    # input: emebed input file
+    # optional:
+    # output: name of output file 
+    # elevation: in degrees, default: 60
+    # azimuth: in degrees, default: 0
+    # radarfrequency: in GHz, default: 1.26
+    # workdir: working directory
+
+    parser = argparse.ArgumentParser(description="Execute disloc workflow.")
+    parser.add_argument('-i','--input', action='store', dest='inputfile',required=True,help='disloc input file')
+    parser.add_argument('-o','--output', action='store', dest='output',required=False,help='output file name prefix')
+    parser.add_argument('-el','--elevation', action='store', dest='elevation',required=False,help='elevation in degrees, default: 60')
+    parser.add_argument('-az','--azimuth', action='store', dest='azimuth',required=False,help='azimuth in degrees, default: 0')
+    parser.add_argument('-rf','--radarfrequency', action='store',dest='radarfrequency',required=False,help='radarfrequency: in GHz, default: 1.26')
+    parser.add_argument('-wd','--workdir', action='store',dest='workdir',required=False,help='working directory')
+    return parser
+
 def main():
 
+    # Read command line arguments
+    parser = _getParser()
+    paras = vars(parser.parse_args())
+    # remove none paras
+    print(paras)
+    noneparas = {k: v for k, v in paras.items() if v is not None}
+    print(noneparas)
+    results = dislocworkflow(noneparas)
+    print(results) 
+
+    # test exec_disloc
     #test case 1
-    input_1 = "test/simple.input"
-    output_1 = "test/simple.output.csv"
-    status = exec_disloc(input_1,output_1)
-    print(status)
-    #test case 2
-    input_2 = "test/simple.input"
-    output_2 = ""
-    status = exec_disloc(input_2,output_2)
-    print(status)
-    #test case 3
-    input_3 = "KO1.input"
-    output_3 = "KO1.input.csv"
-    status = exec_disloc(input_3,output_3,workdir="test")
-    print(status)
+    # input_1 = "test/simple.input"
+    # output_1 = "test/simple.output.csv"
+    # status = exec_disloc(input_1,output_1)
+    # print(status)
+    # #test case 2
+    # input_2 = "test/simple.input"
+    # output_2 = ""
+    # status = exec_disloc(input_2,output_2)
+    # print(status)
+    # #test case 3
+    # input_3 = "KO1.input"
+    # output_3 = "KO1.input.csv"
+    # status = exec_disloc(input_3,output_3,workdir="test")
+    # print(status)
 
 
 if __name__ == '__main__':
