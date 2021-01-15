@@ -31,7 +31,10 @@ Output:
    * output.csv.insar.png	Synthetic Interferograms (plot)   
    * summary.json               Job execution summary
  </pre>
-Sample of summary.json   
+Sample of summary.json     
+```
+disloc_exec -i 4fault.txt -az -5  
+```
 ```json
 {
     "status": "success",
