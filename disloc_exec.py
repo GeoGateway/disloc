@@ -89,8 +89,11 @@ def dislocworkflow(args):
     
     # step 0: working dir and input file
     # create a working dir
-    if 'workdir' in args:
-        outputdir = args['workdir']
+    outputdir = False
+    # create a working dir for api call
+    if 'api' in args:
+        if 'workdir' in args:
+            outputdir = args['workdir']
     else:
         outputdir = setoutputlocation()
 
@@ -100,7 +103,10 @@ def dislocworkflow(args):
             inputdata = f.read()
             args['input'] = inputdata
 
-    inputfile = outputdir + os.path.sep + "input.txt"
+    if outputdir: 
+        inputfile = outputdir + os.path.sep + "input.txt"
+    else:
+        inputfile = "input.txt"
         
     # write input file attached input
     if 'input' in args:
@@ -113,7 +119,7 @@ def dislocworkflow(args):
         outputfile = args['output'] + ".csv"
     else:
         outputfile = "output.csv"
-    print(inputfile,outputfile,outputdir)
+
     disloc_status = exec_disloc(inputfile,outputfile, workdir = outputdir)    
 
     # dislo failed
@@ -133,20 +139,27 @@ def dislocworkflow(args):
         if key in args:
             paralist[key] = float(args[key])
     
-    radarwavelength = 299792458.0/paralist['radarfrequency'] * 100.0 # Convert to cm
+    radarfrequency = paralist['radarfrequency']*10**9 # Ghz to hz
+    radarwavelength = 299792458.0/radarfrequency * 100.0 # Convert to cm
 
     imageURL = ""
     dislocOutput = outputfile
-    print(outputfile)
     lineofsight(paralist['elevation'], paralist['azimuth'],radarwavelength,dislocOutput, imageURL)
 
     # list of output file
-    filelist = os.listdir(outputdir)
-    urlprefix = getURLprefix()
-    foldername = os.path.basename(outputdir)
-    urlslist = [urlprefix + foldername + "/" + x for x in filelist]
-    disloc_status['output'] = urlslist
+    if outputdir:
+        filelist = os.listdir(outputdir)
+    else:
+        filelist = os.listdir()
 
+    if 'api' in args:
+        disloc_status['output'] = filelist
+    else:
+        urlprefix = getURLprefix()
+        foldername = os.path.basename(outputdir)
+        urlslist = [urlprefix + foldername + "/" + x for x in filelist]
+        disloc_status['output'] = urlslist
+    
     return disloc_status
 
 def _getParser():
@@ -174,12 +187,10 @@ def main():
     parser = _getParser()
     paras = vars(parser.parse_args())
     # remove none paras
-    print(paras)
     noneparas = {k: v for k, v in paras.items() if v is not None}
-    print(noneparas)
+    noneparas['api'] = False
     results = dislocworkflow(noneparas)
-    print(results) 
-
+    print(results)
     # test exec_disloc
     #test case 1
     # input_1 = "test/simple.input"

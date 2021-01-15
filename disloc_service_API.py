@@ -61,8 +61,10 @@ def disloc():
     # assume everything is right
     if not("input" in args or 'inputurl' in args):
         return Response(jsonify({"status":"failed","error": "input or inputurl required!"}),status=400)
+    
 
     result = dislocworkflow(args)
+
     if result['status'] != 'success':
         return Response(jsonify(result),status=500)
     
