@@ -10,16 +10,18 @@ complile disloc.c:
 
 **disloc_exec.py**    
 
-   required parameters:   
-   * -i,--input : disloc input file  
-   
-   optional:    
+   required parameters: 
+<pre>
+   -i,--input : disloc input file  
+</pre>  
+   optional:
+<pre>
    * -o, --output : output file name prefix
    * -el, --elevation : elevation in degrees, default: 60
    * -az, --azimuth : azimuth in degrees, default: 0
    * -rf, --radarfrequency : radarfrequency: in GHz, default: 1.26
    * -wd, --workdir : working directory
-
+</pre>
 output:   
 <pre>
    * input.txt                  input file
